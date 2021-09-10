@@ -34,3 +34,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Angular Frontend ###
+src/main/angular-fronts/node_modules
