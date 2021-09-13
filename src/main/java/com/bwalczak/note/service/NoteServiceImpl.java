@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import static com.bwalczak.note.Utils.DateUtil.dateTimeFormatter;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
@@ -35,8 +37,8 @@ public class NoteServiceImpl implements NoteService{
                 .status(OK)
                 .statusCode(OK.value())
                 .timeStamp(timestamp.format(dateTimeFormatter()))
-                .data(noteRepository.findAll())
-                .message(noteRepository.count() > 0 ? noteRepository.count() + "notes retrieved" : "No notes to display!")
+                .data(filterByCreatedAt(noteRepository.findAll()))
+                .message(noteRepository.count() > 0 ? noteRepository.count() + " notes retrieved" : "No notes to display!")
                 .build();
                 // later on, update to return a page of notes, not all of the notes from db - do not use findAll
     }
@@ -49,8 +51,8 @@ public class NoteServiceImpl implements NoteService{
                 .status(OK)
                 .statusCode(OK.value())
                 .timeStamp(timestamp.format(dateTimeFormatter()))
-                .data(notes)
-                .message(notes.size() + "of the " + level + " level")
+                .data(filterByCreatedAt(notes))
+                .message(notes.size() + " of the " + level + " level")
                 .build();
     }
 
@@ -122,5 +124,11 @@ public class NoteServiceImpl implements NoteService{
         noteRepository.save(noteToUpdate);
 
         return noteToUpdate;
+    }
+
+    private List<Note> filterByCreatedAt(List<Note> notes) {
+        return notes.stream()
+                .sorted(Comparator.comparing(Note::getCreatedAt).reversed())
+                .collect(Collectors.toList());
     }
 }
